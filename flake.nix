@@ -71,7 +71,7 @@
               serviceConfig = mkMerge [{
                 User = cfg.user;
                 Group = cfg.group;
-                ExecStart = "${self.packages."${pkgs.system}".restic-exporter}/bin/restic-exporter";
+                ExecStart = "${self.packages."${pkgs.system}".default}/bin/restic-exporter";
                 Restart = "on-failure";
                 EnvironmentFile = mkIf (cfg.environmentFile != null) [ cfg.environmentFile ];
                 Environment = [
