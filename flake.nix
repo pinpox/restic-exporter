@@ -82,16 +82,16 @@
               }];
             };
 
-            users.users = mkIf (cfg.user == "resic-exporter") {
-              resic-exporter = {
+            users.users = mkIf (cfg.user == "restic-exporter") {
+              restic-exporter = {
                 isSystemUser = true;
                 group = cfg.group;
-                description = "resic-exporter system user";
+                description = "restic-exporter system user";
               };
             };
 
             users.groups =
-              mkIf (cfg.group == "resic-exporter") { resic-exporter = { }; };
+              mkIf (cfg.group == "restic-exporter") { restic-exporter = { }; };
 
           };
           meta.maintainers = with lib.maintainers; [ pinpox ];
