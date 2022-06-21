@@ -20,7 +20,6 @@ restic_stats_latest_total_size{hostname="ahorn"} 686011
 Configuration is done via environment variables.
 
 ```
-
 # Exporter configuration
 RESTIC_EXPORTER_BIN="restic"
 RESTIC_EXPORTER_PORT=8999
