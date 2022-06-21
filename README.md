@@ -38,3 +38,17 @@ AWS_SECRET_ACCESS_KEY=aaaaaabbbbbcccccddddd
 
 A nix flake is provided exposing the application as package. It also provides a
 nixos module.
+
+```nix
+services.restic-exporter = {
+  enable = true;
+
+  # Optional configuration
+  port = "8999";
+  address = "127.0.0.1";
+  targets = [ "host1" "host2" "host3" ];
+  user = "restic-exporter";
+  group = "restic-exporter"
+  environmentFile = "/path/to/envfile";
+};
+```

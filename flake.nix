@@ -19,8 +19,6 @@
 
             enable = mkEnableOption "restic-exporter";
 
-            configure-prometheus = mkEnableOption "enable restic-exporter in prometheus";
-
             port = mkOption {
               type = types.str;
               default = "8080";
@@ -39,6 +37,16 @@
               default = [ ];
               example = [ "server01" "server02" ];
               description = "hosts to monitor in backup repository";
+            };
+
+            environmentFile = mkOption {
+              type = types.nullOr types.path;
+              default = null;
+              description = ''
+                Environment file (see <literal>systemd.exec(5)</literal>
+                "EnvironmentFile=" section for the syntax) to define extra variables
+                for the exporter
+              '';
             };
 
             user = mkOption {
@@ -65,7 +73,7 @@
                 Group = cfg.group;
                 ExecStart = "${self.packages."${pkgs.system}".restic-exporter}/bin/restic-exporter";
                 Restart = "on-failure";
-
+                EnvironmentFile = mkIf (cfg.environmentFile != null) [ cfg.environmentFile ];
                 Environment = [
                   "RESTIC_EXPORTER_BIN=${pkgs.restic}/bin/restic"
                   "RESTIC_EXPORTER_PORT=${cfg.port}"
