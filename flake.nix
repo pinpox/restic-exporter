@@ -32,13 +32,6 @@
               description = "Address under which restic-exporter is accessible.";
             };
 
-            targets = mkOption {
-              type = types.listOf types.str;
-              default = [ ];
-              example = [ "server01" "server02" ];
-              description = "hosts to monitor in backup repository";
-            };
-
             environmentFile = mkOption {
               type = types.nullOr types.path;
               default = null;
