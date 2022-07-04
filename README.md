@@ -46,7 +46,6 @@ services.restic-exporter = {
   # Optional configuration
   port = "8999";
   address = "127.0.0.1";
-  targets = [ "host1" "host2" "host3" ];
   user = "restic-exporter";
   group = "restic-exporter";
   environmentFile = "/path/to/envfile";
