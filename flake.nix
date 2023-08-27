@@ -64,6 +64,7 @@
               serviceConfig = mkMerge [{
                 User = cfg.user;
                 Group = cfg.group;
+                CacheDirectory = "restic-exporter";
                 ExecStart = "${self.packages."${pkgs.system}".default}/bin/restic-exporter";
                 Restart = "on-failure";
                 EnvironmentFile = mkIf (cfg.environmentFile != null) [ cfg.environmentFile ];
@@ -71,6 +72,7 @@
                   "RESTIC_EXPORTER_BIN=${pkgs.restic}/bin/restic"
                   "RESTIC_EXPORTER_PORT=${cfg.port}"
                   "RESTIC_EXPORTER_ADDRESS=${cfg.address}"
+                  "RESTIC_EXPORTER_CACHEDIR=/var/cache/restic-exporter"
                 ];
               }];
             };

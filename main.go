@@ -39,6 +39,7 @@ var (
 	envResticBin = getEnvNotEmpty("RESTIC_EXPORTER_BIN")
 	envPort      = getEnvNotEmpty("RESTIC_EXPORTER_PORT")
 	envAddress   = getEnvNotEmpty("RESTIC_EXPORTER_ADDRESS")
+	envCacheDir  = getEnvNotEmpty("RESTIC_EXPORTER_CACHEDIR")
 )
 
 func getEnvNotEmpty(name string) string {
@@ -63,7 +64,6 @@ func main() {
 func probeHandler(w http.ResponseWriter, r *http.Request) {
 
 	var (
-
 		snapshots_latest_time = prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
 				Namespace: "restic",
@@ -113,8 +113,8 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 	registry.MustRegister(latest_total_nfiles)
 	registry.MustRegister(snapshots_latest_time)
 
-	resticStatsCmd := exec.Command(envResticBin, "stats", "latest", "--json", "--host", target)
-	resticSnapshotsCmd := exec.Command(envResticBin, "snapshots", "latest", "--json", "--host", target)
+	resticStatsCmd := exec.Command(envResticBin, "stats", "latest", "--cache-dir", envCacheDir, "--json", "--host", target)
+	resticSnapshotsCmd := exec.Command(envResticBin, "snapshots", "latest", "--cache-dir", envCacheDir, "--json", "--host", target)
 
 	var rd resticData
 
