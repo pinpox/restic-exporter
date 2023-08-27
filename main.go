@@ -156,7 +156,7 @@ func unmarshallFromCmd(cmd *exec.Cmd, out interface{}) error {
 
 	err = cmd.Run()
 	if err != nil {
-		log.Println(stdErr.String())
+		log.Printf("Error occured while running '%s': %s\n", cmd.String(), stdErr.String())
 		return err
 	}
 
