@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -29,6 +30,7 @@ type resticSnapshotData struct {
 	Parent   string    `json:"parent"`
 	Tree     string    `json:"tree"`
 	Paths    []string  `json:"paths"`
+	Tags     []string  `json:"tags"`
 	Hostname string    `json:"hostname"`
 	Username string    `json:"username"`
 	ID       string    `json:"id"`
@@ -71,7 +73,7 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 				Name:      "latest_time",
 				Help:      "Time of the latest snapshot",
 			},
-			[]string{"hostname"},
+			[]string{"hostname", "paths", "tags"},
 		)
 		latest_total_nfiles = prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
@@ -80,7 +82,7 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 				Name:      "latest_total_nfiles",
 				Help:      "Number of files",
 			},
-			[]string{"hostname"},
+			[]string{"hostname", "paths", "tags"},
 		)
 
 		latest_total_size = prometheus.NewGaugeVec(
@@ -90,7 +92,7 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 				Name:      "latest_total_size",
 				Help:      "Total Size",
 			},
-			[]string{"hostname"},
+			[]string{"hostname", "paths", "tags"},
 		)
 	)
 
@@ -100,7 +102,9 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// get ?target=<ip> parameter from request
 	target := r.URL.Query().Get("target")
-	if target == "" {
+	tags := r.URL.Query().Get("tags")
+	path := r.URL.Query().Get("path")
+	if target == "" && tags == "" && path == "" {
 		http.Error(w, "Target parameter is missing", http.StatusBadRequest)
 		return
 	}
@@ -113,8 +117,20 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 	registry.MustRegister(latest_total_nfiles)
 	registry.MustRegister(snapshots_latest_time)
 
-	resticStatsCmd := exec.Command(envResticBin, "stats", "latest", "--cache-dir", envCacheDir, "--json", "--host", target)
-	resticSnapshotsCmd := exec.Command(envResticBin, "snapshots", "latest", "--cache-dir", envCacheDir, "--json", "--host", target)
+	args := []string{"latest", "--cache-dir", envCacheDir, "--json"}
+	if target != "" {
+		args = append(args, "--host", target)
+	}
+	if path != "" {
+		args = append(args, "--path", path)
+	}
+	if tags != "" {
+		for _, tag := range strings.Split(tags, ",") {
+			args = append(args, "--tag", tag)
+		}
+	}
+	resticStatsCmd := exec.Command(envResticBin, append([]string{"stats"}, args...)...)
+	resticSnapshotsCmd := exec.Command(envResticBin, append([]string{"snapshots"}, args...)...)
 
 	var rd resticData
 
@@ -130,7 +146,11 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(rd.Snapshots) != 0 {
 
-		var common_labels prometheus.Labels = prometheus.Labels{"hostname": rd.Snapshots[0].Hostname}
+		var common_labels prometheus.Labels = prometheus.Labels{
+			"hostname": rd.Snapshots[0].Hostname,
+			"paths":    strings.Join(rd.Snapshots[0].Paths, ":"),
+			"tags":     strings.Join(rd.Snapshots[0].Tags, ","),
+		}
 
 		// set metrics
 		latest_total_size.With(prometheus.Labels(common_labels)).Set(float64(rd.Stats.TotalSize))
