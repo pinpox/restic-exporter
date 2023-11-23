@@ -146,16 +146,16 @@ func probeHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(rd.Snapshots) != 0 {
 
-		var common_labels prometheus.Labels = prometheus.Labels{
+		common_labels := prometheus.Labels{
 			"hostname": rd.Snapshots[0].Hostname,
 			"paths":    strings.Join(rd.Snapshots[0].Paths, ":"),
 			"tags":     strings.Join(rd.Snapshots[0].Tags, ","),
 		}
 
 		// set metrics
-		latest_total_size.With(prometheus.Labels(common_labels)).Set(float64(rd.Stats.TotalSize))
-		latest_total_nfiles.With(prometheus.Labels(common_labels)).Set(float64(rd.Stats.TotalFileCount))
-		snapshots_latest_time.With(prometheus.Labels(common_labels)).Set(float64(rd.Snapshots[0].Time.Unix()))
+		latest_total_size.With(common_labels).Set(float64(rd.Stats.TotalSize))
+		latest_total_nfiles.With(common_labels).Set(float64(rd.Stats.TotalFileCount))
+		snapshots_latest_time.With(common_labels).Set(float64(rd.Snapshots[0].Time.Unix()))
 	}
 
 	h := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
