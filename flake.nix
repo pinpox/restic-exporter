@@ -107,7 +107,7 @@
             pname = "restic-exporter";
             version = "1.0.0";
             src = self;
-            vendorSha256 = "sha256-HUruT0+yOP+v5lxd4jrxYhRBzE0FcoW4OpcWgRRedwA=";
+            vendorHash = "sha256-HUruT0+yOP+v5lxd4jrxYhRBzE0FcoW4OpcWgRRedwA=";
             installCheckPhase = ''
               runHook preCheck
               $out/bin/restic-exporter -h
